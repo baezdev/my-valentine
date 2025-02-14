@@ -1,0 +1,99 @@
+---
+const images = Array.from(
+  { length: 12 },
+  (_, i) => `/love_images/love${i + 1}.webp`
+);
+---
+
+<main class="relative w-full h-dvh overflow-hidden">
+  <button
+    id="surprise"
+    class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 cursor-pointer animate-pulse"
+  >
+    <img src="/heart.svg" alt="Te amo muchisisisisisimo <3" class="size-32" />
+  </button>
+  <div id="images" class="absolute inset-0 grid grid-cols-6 gap-0">
+    {
+      images.map((imageUrl) => (
+        <img src={imageUrl} class="h-full w-full" alt="Te amo mi vida <3" />
+      ))
+    }
+  </div>
+  <div
+    id="mask"
+    class="absolute inset-0 w-full h-full bg-black z-20"
+    style="
+      will-change: mask-image;"
+  >
+  </div>
+  <audio id="audio" src="/Jaymes Young - Infinity.mp3" preload="auto" loop
+  ></audio>
+</main>
+<script>
+  const $mask = document.getElementById("mask") as HTMLDivElement;
+  const $surprise = document.getElementById("surprise") as HTMLButtonElement;
+  const $audio = document.getElementById("audio") as HTMLAudioElement;
+
+  let isPlaying = false;
+
+  let radius = 0;
+
+  function animateMask(expanding) {
+    const start = expanding ? 1500 : 0;
+    const end = expanding ? 0 : 1500;
+    const duration = 1000;
+    const startTime = performance.now();
+
+    function step(time) {
+      let progress = (time - startTime) / duration;
+      if (progress > 1) progress = 1;
+      
+      const currentRadius = start + (end - start) * progress;
+      $mask.style.maskImage = `radial-gradient(circle ${currentRadius}px at center, transparent 30%, black 70%)`;
+
+      if (progress < 1) {
+        requestAnimationFrame(step);
+      }
+    }
+
+    requestAnimationFrame(step);
+  }
+
+  $surprise.addEventListener("click", () => {
+    if (isPlaying) {
+      $audio.pause();
+      $mask.style.transition = "mask-image 4s ease-in-out";
+      $mask.style.maskImage =
+        "radial-gradient(circle 180px at center, transparent 30%, black 70%)";
+    } else {
+      $audio.play();
+      $audio.volume = 1;
+      $mask.style.transition = "mask-image 1s ease-in-out";
+      $mask.style.maskImage =
+        "radial-gradient(circle 1500px at center, transparent 100%, black 100%)";
+        animateMask(isPlaying);
+    }
+    isPlaying = !isPlaying;
+  });
+
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden && isPlaying) {
+      $audio.pause();
+      $mask.style.transition = "mask-image 1s ease-in-out";
+      $mask.style.maskImage =
+        "radial-gradient(circle 180px at center, transparent 30%, black 70%)";
+      isPlaying = false;
+    }
+  });
+
+  document.addEventListener("mousemove", (event) => {
+    if (!isPlaying) {
+      window.requestAnimationFrame(() => {
+        const { clientX, clientY } = event;
+
+        if (!$mask) return;
+        $mask.style.maskImage = `radial-gradient(circle 180px at ${clientX}px ${clientY}px, transparent 30%, black 70%)`;
+      });
+    }
+  });
+</script>
